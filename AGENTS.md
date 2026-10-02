@@ -2,19 +2,21 @@
 
 **More Code. Less Energy. Zero Useless Consumption.**
 
-Green-IT-Open-Source-Projekt (MIT, John Bubak): Ein ~1-KB-Drop-in, das sinnlose
+Green-IT-Open-Source-Projekt (MIT, John Bubak): Ein ~1.2-KB-Drop-in, das sinnlose
 404-Favicon-Requests (`/favicon.ico`, `apple-touch-icon*.png`) im Browser abfängt,
-bevor sie den Server erreichen. Generatives SVG-Favicon aus Domain-Initialen als
-Data-URI — der HTTP-Request erreicht den Server nie.
+bevor sie den Server erreichen. Generatives SVG-Favicon aus Domain-/Title-Initialen
+(adaptive Schriftgröße) als Data-URI — der HTTP-Request erreicht den Server nie.
 
 ## Dateien
 
 | Datei | Zweck |
 |---|---|
-| `wattdrop.js` | Quelle (lesbar, kommentiert): Initialen → Gradient-SVG als Data-URI |
-| `wattdrop.min.js` | Minifiziertes Drop-in (1082 Bytes), via CDN geladen |
-| `README.md` | Public-Pitch (Englisch), Napkin-Math, 3-Säulen-Vision |
+| `wattdrop.js` | Quelle (lesbar, kommentiert): Initialen (Domain → Title → Fallback) → Gradient-SVG als Data-URI, adaptive Schriftgröße + `dominant-baseline`-Zentrierung |
+| `wattdrop.min.js` | Minifiziertes Drop-in (1183 Bytes), via CDN geladen |
+| `README.md` | Public-Pitch (Englisch), realistische Einsparungskalkulation mit Quellen, Donations, 3-Säulen-Vision |
 | `LICENSE` | MIT |
+| `.github/FUNDING.yml` | Donation-Buttons (GitHub Sponsors, Ko-fi, PayPal, Binance Pay) — Sponsor-Tab |
+| `.gitignore` | Ignoriert `data/` (lokale Artefakte) — nie committen |
 | `server-configs/nginx.conf` | nginx: 204 für fehlende Icons, Image-Fallback, expires 1y, gzip |
 | `server-configs/.htaccess` | Apache-Pendant (mod_rewrite, `!-f`-Check, Image-Fallback, gzip) |
 | `server-configs/cloudflare-worker.js` | Edge: 204 für Icon-Pfade (Origin bleibt bei 0 W) |
@@ -30,6 +32,8 @@ Data-URI — der HTTP-Request erreicht den Server nie.
 ```
 
 Sobald das Repo auf GitHub ist, liefert jsDelivr die Datei automatisch aus.
+**Referenz-Deployment:** `aip.bobka.net` (ai-proxy) serviert `icon.svg` live für
+8 Icon-Pfade inkl. `favicon-192/512` — Server-Side-Muster aus `snippets/fastapi.py`.
 
 ## Architektur & Constraints
 
@@ -37,7 +41,8 @@ Sobald das Repo auf GitHub ist, liefert jsDelivr die Datei automatisch aus.
   Data-URI-Injektion sind das Herzstück — der Request darf nie den Server erreichen.
 - **Zero-Config / Zero-Dependency:** Keine externen Libs, kein Build-Step, kein
   Bild-Bloat — SVG wird als String aus dem RAM erzeugt (Initialen aus
-  `location.hostname`, Grün→Blau `#10b981`→`#0ea5e9`, Fallback "ZI").
+  `location.hostname` oder `document.title`, Grün→Blau `#10b981`→`#0ea5e9`,
+  Fallback "ZI", Schriftgröße 46/64 je nach Länge).
 - **CSS/JS-Bündelung NICHT im Browser lösen:** HTTP/2-Multiplexing, gzip, hartes
   Caching gehören in `server-configs/`, nicht in JS.
 - **Fehlende Bilder:** JS repariert nur das Layout — echten Strom spart erst die
@@ -55,8 +60,9 @@ Sobald das Repo auf GitHub ist, liefert jsDelivr die Datei automatisch aus.
 ## Hinweise für Agenten
 
 - **Sprache:** Public-facing Dateien (README, Snippets, Doku) auf Englisch.
-- **Kein Commit ohne Auftrag:** Repo ist git-initialisiert (`main`), **noch kein
-  Commit** — existiert nicht auf GitHub (Stand 2026-10-01).
+- **Kein Commit ohne Auftrag:** Repo ist veröffentlicht auf GitHub
+  (`github.com/johnbubak/wattdrop`, Branch `main`). Commits nur mit explizitem
+  Auftrag; jsDelivr serviert den `main`-Branch automatisch als CDN.
 - **Kein Build/Tests/CI:** Verifikation = Syntax-Checks (`node --check` für JS).
   `php` ist lokal nicht installiert — PHP nur statisch/manuell prüfen.
 - **`wattdrop.min.js` manuell pflegen:** Es gibt keinen Minify-Build — Änderungen
@@ -64,8 +70,8 @@ Sobald das Repo auf GitHub ist, liefert jsDelivr die Datei automatisch aus.
 - **`data/` ignorieren:** `data/tokens.db` ist ein lokales, untracked Artefakt —
   nicht Teil des Repos, nie committen.
 - **Snippets konsistent halten:** Gleiche Icon-Pfade (`/favicon.ico`,
-  `favicon-16x16/32x32.png`, `apple-touch-icon*.png`), reale Datei vor
-  SVG-Fallback prüfen, sonst 204/SVG aus dem Speicher.
+  `favicon-16x16/32x32/192x192/512x512.png`, `apple-touch-icon*.png`, `icon.svg`),
+  reale Datei vor SVG-Fallback prüfen, sonst 204/SVG aus dem Speicher.
 - **Server-Configs — reale Datei gewinnt immer:** `RedirectMatch 204` (Apache)
   und `return 204` (nginx) schatten echte Icons. Verifizierte Muster: Apache
   `RewriteCond %{REQUEST_FILENAME} !-f` + `[R=204,L]`; nginx

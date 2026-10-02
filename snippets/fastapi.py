@@ -15,8 +15,11 @@ DEFAULT_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><
 @wattdrop_router.get("/favicon.ico", include_in_schema=False)
 @wattdrop_router.get("/favicon-16x16.png", include_in_schema=False)
 @wattdrop_router.get("/favicon-32x32.png", include_in_schema=False)
+@wattdrop_router.get("/favicon-192x192.png", include_in_schema=False)
+@wattdrop_router.get("/favicon-512x512.png", include_in_schema=False)
 @wattdrop_router.get("/apple-touch-icon.png", include_in_schema=False)
 @wattdrop_router.get("/apple-touch-icon-precomposed.png", include_in_schema=False)
+@wattdrop_router.get("/icon.svg", include_in_schema=False)
 async def eco_icon_handler():
     # 1. Prioritize real files if they exist
     if Path("favicon.ico").exists():
