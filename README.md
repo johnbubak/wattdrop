@@ -2,6 +2,10 @@
 
 **More Code. Less Energy. Zero Useless Consumption.**
 
+> 🔴 **Live-Demo:** [wattdrop.bobka.net](https://wattdrop.bobka.net) —
+> that page runs WattDrop itself. Open it, watch the gradient tab icon appear —
+> not a single favicon request ever reaches the server.
+
 Every missing `favicon.ico` is a silent energy vampire. Your visitors' browsers auto-request it on every page load ([the HTML spec says so](https://html.spec.whatwg.org/multipage/links.html#rel-icon)). If it isn't there, your server still wakes up, runs your framework, generates a 404 page, and writes a log line — for **zero visual benefit**.
 
 **WattDrop** is a ~1.2 KB drop-in that kills this consumption at the source. It intercepts the missing icon request directly in the browser, generates a lettered, gradient SVG in memory, and the HTTP request **never hits your server**.
